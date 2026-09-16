@@ -1,0 +1,15 @@
+{
+  "name": "prime-pairing-server",
+  "version": "1.0.0",
+  "description": "PRIME WhatsApp Pairing Backend",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "express": "^4.21.2",
+    "pino": "^9.6.0"
+  }
+}
