@@ -1,0 +1,311 @@
+{
+    "version": 3,
+    "people": {
+        "2349158667929@s.whatsapp.net": {
+            "lid": "2349158667929@s.whatsapp.net",
+            "name": null,
+            "aliases": [],
+            "age": null,
+            "gender": null,
+            "interests": [],
+            "likes": [],
+            "dislikes": [],
+            "importantFacts": [],
+            "events": [],
+            "temporaryMemories": [],
+            "notes": [],
+            "conversationSummary": "**Memory Summary – 2349158667929@s.whatsapp.net**  \n- Frequently greets with enthusiastic, informal variations of “hi/hey” (e.g., “hii”, “heyy”, “hiiiiiiiii",
+            "communicationStyle": {
+                "language": "Nigerian English",
+                "usesPidgin": false,
+                "usesEmojis": false,
+                "humour": "unknown",
+                "tone": "unknown"
+            },
+            "relationship": {
+                "status": "unknown",
+                "partnerName": null,
+                "history": []
+            },
+            "firstSeen": "2026-09-19T18:23:02.972Z",
+            "lastSeen": "2026-09-21T10:47:33.398Z",
+            "createdAt": "2026-09-19T18:23:02.973Z",
+            "updatedAt": "2026-09-21T10:47:33.398Z"
+        },
+        "test123@lid": {
+            "lid": "test123@lid",
+            "name": null,
+            "aliases": [],
+            "age": null,
+            "gender": null,
+            "interests": [],
+            "likes": [],
+            "dislikes": [],
+            "importantFacts": [],
+            "events": [],
+            "temporaryMemories": [],
+            "notes": [],
+            "conversationSummary": "User test123@lid greeted Stacy.",
+            "communicationStyle": {
+                "language": "Nigerian English",
+                "usesPidgin": false,
+                "usesEmojis": false,
+                "humour": "unknown",
+                "tone": "unknown"
+            },
+            "relationship": {
+                "status": "unknown",
+                "partnerName": null,
+                "history": []
+            },
+            "firstSeen": "2026-09-19T18:45:59.084Z",
+            "lastSeen": "2026-09-19T18:46:02.802Z",
+            "createdAt": "2026-09-19T18:45:59.084Z",
+            "updatedAt": "2026-09-19T18:46:02.802Z"
+        }
+    },
+    "groups": {
+        "120363429068756346@g.us": {
+            "groupId": "120363429068756346@g.us",
+            "name": null,
+            "commonTopics": [],
+            "members": {
+                "2349158667929@s.whatsapp.net": {
+                    "lid": "2349158667929@s.whatsapp.net",
+                    "name": null,
+                    "firstSeen": "2026-09-19T18:23:02.974Z",
+                    "lastSeen": "2026-09-19T19:30:25.292Z"
+                }
+            },
+            "conversation": [
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "@237971974430778 hii",
+                    "timestamp": "2026-09-19T18:23:02.977Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "speaker: \"stacy\"\ncontent: \"Hey, how far?\"",
+                    "timestamp": "2026-09-19T18:23:05.827Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "@237971974430778 heyy",
+                    "timestamp": "2026-09-19T18:36:35.369Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "@237971974430778 hi",
+                    "timestamp": "2026-09-19T18:40:11.006Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "@237971974430778 hi",
+                    "timestamp": "2026-09-19T18:40:16.749Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "@237971974430778 hiiiiiiiiiii",
+                    "timestamp": "2026-09-19T18:58:03.987Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "@237971974430778 hiii",
+                    "timestamp": "2026-09-19T19:06:19.005Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "@237971974430778 hey there",
+                    "timestamp": "2026-09-19T19:28:02.011Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "Hey, how far?",
+                    "timestamp": "2026-09-19T19:28:05.547Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Previous message you sent:\n\"Hey, how far?\"\n\nUser's reply:\nIm calm\nHow are you\n\nRespond naturally to the user's reply.",
+                    "timestamp": "2026-09-19T19:28:47.861Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "I dey fine, thanks. You dey chill?",
+                    "timestamp": "2026-09-19T19:28:49.951Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Previous message you sent:\n\"I dey fine, thanks. You dey chill?\"\n\nUser's reply:\nYeah I'm cool\nWyd\n\nRespond naturally to the user's reply.",
+                    "timestamp": "2026-09-19T19:29:16.452Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "Just dey grind some Free Fire, you? 🙌",
+                    "timestamp": "2026-09-19T19:29:17.926Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Previous message you sent:\n\"Just dey grind some Free Fire, you? 🙌\"\n\nUser's reply:\nSpeak English please\n\nRespond naturally to the user's reply.",
+                    "timestamp": "2026-09-19T19:29:30.763Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "I'm just playing some Free Fire. What are you up to?",
+                    "timestamp": "2026-09-19T19:29:31.847Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Previous message you sent:\n\"I'm just playing some Free Fire. What are you up to?\"\n\nUser's reply:\nDo you remember who i am\n\nRespond naturally to the user's reply.",
+                    "timestamp": "2026-09-19T19:29:37.405Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "I’m not quite sure, who am I chatting with? 😅",
+                    "timestamp": "2026-09-19T19:29:39.048Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Previous message you sent:\n\"I’m not quite sure, who am I chatting with? 😅\"\n\nUser's reply:\nRaymond\n\nRespond naturally to the user's reply.",
+                    "timestamp": "2026-09-19T19:29:47.940Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "Hey Raymond! Good to hear from you. How’s your day going?",
+                    "timestamp": "2026-09-19T19:29:49.540Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Previous message you sent:\n\"Hey Raymond! Good to hear from you. How’s your day going?\"\n\nUser's reply:\nWho is Raymond to you\n\nRespond naturally to the user's reply.",
+                    "timestamp": "2026-09-19T19:30:05.518Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "He's my boyfriend, Raymond. 🙂",
+                    "timestamp": "2026-09-19T19:30:06.809Z"
+                },
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Previous message you sent:\n\"He's my boyfriend, Raymond. 🙂\"\n\nUser's reply:\nMehnn\nI'm the one\nDid you forget\n\nRespond naturally to the user's reply.",
+                    "timestamp": "2026-09-19T19:30:25.365Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "Ah, my bad, Raymond! Sorry, I slipped. How you dey?",
+                    "timestamp": "2026-09-19T19:30:27.018Z"
+                }
+            ],
+            "createdAt": "2026-09-19T18:23:02.928Z",
+            "updatedAt": "2026-09-19T19:30:27.018Z"
+        },
+        "test-group@g.us": {
+            "groupId": "test-group@g.us",
+            "name": null,
+            "commonTopics": [],
+            "members": {
+                "test123@lid": {
+                    "lid": "test123@lid",
+                    "name": null,
+                    "firstSeen": "2026-09-19T18:45:59.086Z",
+                    "lastSeen": "2026-09-19T18:45:59.086Z"
+                }
+            },
+            "conversation": [
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "test123@lid",
+                    "content": "Hey Stacy, say hello",
+                    "timestamp": "2026-09-19T18:45:59.088Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "Hey! How far?",
+                    "timestamp": "2026-09-19T18:46:01.893Z"
+                }
+            ],
+            "createdAt": "2026-09-19T18:45:59.058Z",
+            "updatedAt": "2026-09-19T18:46:01.893Z"
+        },
+        "120363360075826517@g.us": {
+            "groupId": "120363360075826517@g.us",
+            "name": null,
+            "commonTopics": [],
+            "members": {
+                "2349158667929@s.whatsapp.net": {
+                    "lid": "2349158667929@s.whatsapp.net",
+                    "name": null,
+                    "firstSeen": "2026-09-21T10:47:24.488Z",
+                    "lastSeen": "2026-09-21T10:47:24.488Z"
+                }
+            },
+            "conversation": [
+                {
+                    "role": "user",
+                    "speaker": "human",
+                    "personLid": "2349158667929@s.whatsapp.net",
+                    "content": "Which Stacy\n@237971974430778 ?",
+                    "timestamp": "2026-09-21T10:47:24.493Z"
+                },
+                {
+                    "role": "assistant",
+                    "speaker": "stacy",
+                    "personLid": null,
+                    "content": "I'm Stacy – the bot here. Steeze created me. 🙂",
+                    "timestamp": "2026-09-21T10:47:32.302Z"
+                }
+            ],
+            "createdAt": "2026-09-21T10:47:24.453Z",
+            "updatedAt": "2026-09-21T10:47:32.302Z"
+        }
+    },
+    "relationships": [],
+    "globalEvents": []
+}
