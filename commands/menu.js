@@ -190,7 +190,11 @@ Make sure the URL is a direct, publicly accessible image URL.`;
 ┏━━〔 🔄 CONVERTER 〕━━┓
 ┃
 ┃ › .tourl
+┃ › .tovid
+┃ › .tomp3
 ┃ › .toimg
+┃ › .take
+┃ › .tts
 ┃ › .sticker
 ┃
 ┗━━━━━━━━━━━━━━━━━━━━┛
@@ -220,6 +224,7 @@ Make sure the URL is a direct, publicly accessible image URL.`;
 
 ┏━━〔 📥 DOWNLOADER 〕━━┓
 ┃
+┃ › .tiktok
 ┃ › .play
 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━┛

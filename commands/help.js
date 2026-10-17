@@ -87,6 +87,17 @@ Convert a sticker to image.
 .tourl
 Upload media and generate a URL.
 
+.tts
+Convert text to a voice note.
+(USAGE: .tts hello, .tts -fr bonjour, or reply to a message with .tts).
+
+.take
+Rename a sticker's pack name.
+(USAGE: reply to a sticker with .take steeze, or .take steeze | author).
+
+.tiktok
+Download a TikTok video with its caption, likes and comments.
+(USAGE: .tiktok <link>, or reply to a link with .tiktok).
 
 🛡️ SYSTEM
 .pair <number>
