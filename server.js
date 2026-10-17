@@ -25,8 +25,7 @@ const ZIP_IGNORE = [
     'node_modules/**',
     'sessions/**',
     'auth/**',
-    '.git/**',
-    '.env'
+    '.git/**'
 ];
 
 const CODE_WAIT_MS = 5 * 60 * 1000;      // time to enter the code in WhatsApp
