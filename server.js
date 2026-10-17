@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const crypto = require('crypto');
 const fs = require('fs-extra');
 const archiver = require('archiver');
 const pino = require('pino');
@@ -13,149 +14,194 @@ const {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SESSIONS_DIR = path.join(__dirname, 'sessions');
+const BOT_DIR = path.join(__dirname, 'bot-files');
 
-app.use(cors());
+const CODE_WAIT_MS = 5 * 60 * 1000;      // time to enter the code in WhatsApp
+const DOWNLOAD_WAIT_MS = 10 * 60 * 1000; // time to download after linking
+const MAX_SESSIONS = 30;                 // protects the free Render instance
+
+app.set('trust proxy', 1);
+app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
 app.use(express.json());
 
-// In-memory store for tracking active pairing sessions
-const activeSessions = new Map();
+// Remove leftovers from any previous run
+fs.emptyDirSync(SESSIONS_DIR);
 
-/**
- * Route: Request Pairing Code
- * Receives phone number, spins up Baileys socket, and returns pairing code.
- */
+const sessions = new Map();
+
+/* ---------- helpers ---------- */
+
+const hits = new Map();
+function rateLimited(ip) {
+    const now = Date.now();
+    const list = (hits.get(ip) || []).filter((t) => now - t < 10 * 60 * 1000);
+    const limited = list.length >= 5; // 5 codes per 10 minutes per IP
+    if (!limited) list.push(now);
+    hits.set(ip, list);
+    return limited;
+}
+
+function destroySession(id) {
+    const s = sessions.get(id);
+    if (!s) return;
+    s.closed = true;
+    try { s.socket?.end(); } catch {}
+    fs.remove(s.dir).catch(() => {});
+    sessions.delete(id);
+    console.log(`[${id.slice(0, 6)}] session cleaned up`);
+}
+
+async function connect(id) {
+    const s = sessions.get(id);
+    if (!s || s.closed) return null;
+
+    const { state, saveCreds } = await useMultiFileAuthState(s.dir);
+    const socket = makeWASocket({
+        auth: state,
+        printQRInTerminal: false,
+        logger: pino({ level: 'silent' }),
+        browser: ['Ubuntu', 'Chrome', '20.0.04']
+    });
+
+    s.socket = socket;
+    socket.ev.on('creds.update', saveCreds);
+
+    socket.ev.on('connection.update', ({ connection, lastDisconnect }) => {
+        if (s.closed || s.status === 'connected') return;
+
+        if (connection === 'open') {
+            // Give Baileys a few seconds to write all auth files before zipping
+            setTimeout(() => {
+                if (s.closed || s.status !== 'pending') return;
+                s.status = 'connected';
+                s.expiresAt = Date.now() + DOWNLOAD_WAIT_MS;
+                console.log(`[${id.slice(0, 6)}] linked`);
+            }, 4000);
+            return;
+        }
+
+        if (connection === 'close') {
+            const code = lastDisconnect?.error?.output?.statusCode;
+            // WhatsApp restarts the socket right after pairing: reconnect
+            if (code === DisconnectReason.restartRequired && s.retries < 5) {
+                s.retries += 1;
+                connect(id).catch(() => { s.status = 'failed'; });
+            } else {
+                s.status = 'failed';
+            }
+        }
+    });
+
+    return { socket, state };
+}
+
+// Sweep expired sessions every minute
+setInterval(() => {
+    const now = Date.now();
+    for (const [id, s] of sessions) {
+        if (now > s.expiresAt) destroySession(id);
+    }
+}, 60 * 1000);
+
+/* ---------- routes ---------- */
+
+app.get('/', (req, res) => res.send('PRIME BOT pairing server is running'));
+app.get('/api/ping', (req, res) => res.json({ ok: true }));
+
 app.post('/api/request-code', async (req, res) => {
-    let { phoneNumber } = req.body;
+    const phone = String(req.body?.phoneNumber || '').replace(/[^0-9]/g, '');
 
-    if (!phoneNumber) {
-        return res.status(400).json({ success: false, message: 'Phone number is required.' });
+    if (phone.length < 8 || phone.length > 15) {
+        return res.status(400).json({
+            success: false,
+            message: 'Enter a valid number with country code, e.g. 234123456789.'
+        });
+    }
+    if (rateLimited(req.ip)) {
+        return res.status(429).json({
+            success: false,
+            message: 'Too many attempts. Wait a few minutes and try again.'
+        });
+    }
+    if (sessions.size >= MAX_SESSIONS) {
+        return res.status(503).json({
+            success: false,
+            message: 'Server is busy. Try again in a few minutes.'
+        });
     }
 
-    // Clean phone number format (remove +, spaces, or dashes)
-    phoneNumber = phoneNumber.replace(/[^0-9]/g, '');
-
-    const sessionId = `session_${Date.now()}`;
-    const sessionDir = path.join(__dirname, 'sessions', sessionId);
+    const id = crypto.randomBytes(16).toString('hex'); // unguessable
+    sessions.set(id, {
+        status: 'pending',
+        dir: path.join(SESSIONS_DIR, id),
+        socket: null,
+        closed: false,
+        retries: 0,
+        expiresAt: Date.now() + CODE_WAIT_MS
+    });
 
     try {
-        const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
+        const { socket, state } = await connect(id);
 
-        const socket = makeWASocket({
-            auth: state,
-            printQRInTerminal: false,
-            logger: pino({ level: 'silent' }),
-            browser: ['Ubuntu', 'Chrome', '20.0.04']
-        });
-
-        socket.ev.on('creds.update', saveCreds);
-
-        // Track session status
-        activeSessions.set(sessionId, {
-            status: 'pending',
-            dir: sessionDir,
-            socket: socket
-        });
-
-        // Delay slight tick to ensure socket handshakes before requesting code
-        await delay(2000);
-
-        if (!socket.authState.creds.registered) {
-            const pairingCode = await socket.requestPairingCode(phoneNumber);
-
-            // Listen for successful authentication
-            socket.ev.on('connection.update', async (update) => {
-                const { connection, lastDisconnect } = update;
-
-                if (connection === 'open') {
-                    console.log(`[${sessionId}] Connection opened successfully.`);
-                    const session = activeSessions.get(sessionId);
-                    if (session) {
-                        session.status = 'connected';
-                    }
-                } else if (connection === 'close') {
-                    const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-                    if (!shouldReconnect) {
-                        console.log(`[${sessionId}] Session closed or logged out.`);
-                    }
-                }
-            });
-
-            return res.json({
-                success: true,
-                code: pairingCode,
-                sessionId: sessionId
-            });
-        } else {
+        if (state.creds.registered) {
+            destroySession(id);
             return res.status(400).json({ success: false, message: 'Number is already registered.' });
         }
 
+        await delay(2000); // let the socket handshake first
+        const code = await socket.requestPairingCode(phone);
+
+        return res.json({
+            success: true,
+            code,
+            sessionId: id,
+            expiresIn: CODE_WAIT_MS / 1000
+        });
     } catch (error) {
         console.error('Error requesting pairing code:', error);
-        // Clean up directory on failure
-        fs.removeSync(sessionDir);
-        return res.status(500).json({ success: false, message: 'Failed to generate code.' });
+        destroySession(id);
+        return res.status(500).json({ success: false, message: 'Failed to generate code. Try again.' });
     }
 });
 
-/**
- * Route: Check Session Status
- * Polled by frontend every 3 seconds to check if device completed pairing.
- */
 app.get('/api/check-status/:sessionId', (req, res) => {
-    const { sessionId } = req.params;
-    const session = activeSessions.get(sessionId);
-
-    if (!session) {
-        return res.json({ status: 'not_found' });
-    }
-
-    return res.json({ status: session.status });
+    const s = sessions.get(req.params.sessionId);
+    if (!s) return res.json({ status: 'not_found' });
+    return res.json({ status: s.status });
 });
 
-/**
- * Route: Auto-Download Bot Zip
- * Triggers ZIP download containing session credentials and bot core files.
- */
-app.get('/api/download/:sessionId', async (req, res) => {
-    const { sessionId } = req.params;
-    const session = activeSessions.get(sessionId);
+app.get('/api/download/:sessionId', (req, res) => {
+    const id = req.params.sessionId;
+    const s = sessions.get(id);
 
-    if (!session || session.status !== 'connected') {
+    if (!s || s.status !== 'connected') {
         return res.status(400).send('Session not authenticated or expired.');
     }
 
-    const zipFileName = `PRIME_BOT_${sessionId}.zip`;
-    res.attachment(zipFileName);
+    res.attachment('Prime_Bot-v1.zip');
 
     const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.on('error', (err) => {
+        console.error('Zip error:', err);
+        res.end();
+    });
     archive.pipe(res);
 
-    // 1. Pack session auth folder into zip
-    archive.directory(session.dir, 'session');
+    // Your bot reads its login from ./auth
+    archive.directory(s.dir, 'auth');
 
-    // 2. Pack core bot files (e.g., commands, index.js, package.json) if present
-    const botCorePath = path.join(__dirname, 'bot-files');
-    if (fs.existsSync(botCorePath)) {
-        archive.directory(botCorePath, false);
+    // Bot files, without secrets or heavy folders
+    if (fs.existsSync(BOT_DIR)) {
+        archive.glob('**/*', {
+            cwd: BOT_DIR,
+            dot: true,
+            ignore: ['node_modules/**', 'auth/**', '.git/**', '.env']
+        });
     }
 
-    await archive.finalize();
-
-    // Clean up memory and temp session files after download stream completes
-    res.on('finish', () => {
-        setTimeout(() => {
-            try {
-                if (session.socket) session.socket.end();
-                fs.removeSync(session.dir);
-                activeSessions.delete(sessionId);
-                console.log(`[${sessionId}] Cleaned up session files.`);
-            } catch (e) {
-                console.error('Cleanup error:', e);
-            }
-        }, 5000);
-    });
+    res.on('finish', () => setTimeout(() => destroySession(id), 5000));
+    archive.finalize();
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
