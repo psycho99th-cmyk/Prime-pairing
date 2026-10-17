@@ -16,17 +16,40 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const SESSIONS_DIR = path.join(__dirname, 'sessions');
 const BOT_DIR = __dirname; // bot files live next to server.js
+const BOT_PACKAGE_FILE = path.join(__dirname, 'bot-package.json'); // your bot's package.json
 
 // Left out of the zip: pairing-server files, session data and secrets
 const ZIP_IGNORE = [
     'server.js',
     'package.json',
     'package-lock.json',
+    'bot-package.json',
     'node_modules/**',
     'sessions/**',
     'auth/**',
     '.git/**'
 ];
+
+// package.json generated into every zip, so the panel installs the bot's dependencies
+const BOT_PACKAGE = {
+    name: 'prime-bot',
+    version: '1.0.0',
+    description: 'PRIME BOT',
+    main: 'index.js',
+    scripts: { start: 'node index.js' },
+    dependencies: {
+        '@whiskeysockets/baileys': '^7.0.0-rc14',
+        axios: '^1.20.0',
+        dotenv: '^18.0.0',
+        'form-data': '^4.0.6',
+        'google-tts-api': '^2.0.2',
+        'groq-sdk': '^1.6.0',
+        'node-webpmux': '^3.2.1',
+        pino: '^10.3.1',
+        'qrcode-terminal': '^0.12.0',
+        sharp: '^0.35.4'
+    }
+};
 
 const CODE_WAIT_MS = 5 * 60 * 1000;      // time to enter the code in WhatsApp
 const DOWNLOAD_WAIT_MS = 10 * 60 * 1000; // time to download after linking
@@ -208,6 +231,12 @@ app.get('/api/download/:sessionId', (req, res) => {
         dot: true,
         ignore: ZIP_IGNORE
     });
+
+    // Your bot's package.json goes in the zip as package.json
+    const pkgText = fs.existsSync(BOT_PACKAGE_FILE)
+        ? fs.readFileSync(BOT_PACKAGE_FILE, 'utf8')
+        : JSON.stringify(BOT_PACKAGE, null, 2);
+    archive.append(pkgText, { name: 'package.json' });
 
     res.on('finish', () => setTimeout(() => destroySession(id), 5000));
     archive.finalize();
