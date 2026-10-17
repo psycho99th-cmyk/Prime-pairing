@@ -1064,28 +1064,9 @@ async function isStacyMentioned(
     const mentioned =
         context?.mentionedJid || [];
 
-    console.log(
-        "🤖 STACY MENTION CHECK"
-    );
-
-    console.log(
-        "🤖 BOT IDS:",
-        getStacyBotJids(sock)
-    );
-
-    console.log(
-        "🤖 MENTIONED JIDS:",
-        mentioned
-    );
-
     if (
         !mentioned.length
     ) {
-
-        console.log(
-            "🤖 STACY: No mentions found."
-        );
-
         return false;
     }
 
@@ -1103,13 +1084,6 @@ async function isStacyMentioned(
                 mentionedJid
             );
 
-        console.log(
-            "🤖 CHECKING:",
-            mentionedJid,
-            "→",
-            normalizedMention
-        );
-
         if (
             botJids.includes(
                 mentionedJid
@@ -1118,11 +1092,6 @@ async function isStacyMentioned(
                 normalizedMention
             )
         ) {
-
-            console.log(
-                "✅ STACY MENTION MATCHED"
-            );
-
             return true;
         }
 
@@ -1131,11 +1100,6 @@ async function isStacyMentioned(
                 sock,
                 mentionedJid
             );
-
-        console.log(
-            "🤖 RESOLVED MENTION:",
-            resolvedMention
-        );
 
         if (
             resolvedMention
@@ -1151,56 +1115,10 @@ async function isStacyMentioned(
                     normalizedResolved
                 )
             ) {
-
-                console.log(
-                    "✅ STACY MENTION MATCHED: LID → PHONE"
-                );
-
-                return true;
-            }
-        }
-
-        for (
-            const botJid of botJids
-        ) {
-
-            if (
-                !botJid.endsWith(
-                    "@lid"
-                )
-            ) {
-                continue;
-            }
-
-            const resolvedBot =
-                await resolvePhoneJid(
-                    sock,
-                    botJid
-                );
-
-            if (
-                resolvedBot &&
-                resolvedMention &&
-                normalizeBotJid(
-                    resolvedBot
-                ) ===
-                normalizeBotJid(
-                    resolvedMention
-                )
-            ) {
-
-                console.log(
-                    "✅ STACY MENTION MATCHED: BOT LID ↔ MENTION LID"
-                );
-
                 return true;
             }
         }
     }
-
-    console.log(
-        "❌ STACY MENTION NOT MATCHED"
-    );
 
     return false;
 }
@@ -1296,10 +1214,6 @@ async function handleStacy(
     text
 ) {
 
-    console.log(
-        "🤖 STACY HANDLER CHECK"
-    );
-
     if (
         !chatJid?.endsWith("@g.us")
     ) {
@@ -1310,11 +1224,6 @@ async function handleStacy(
     if (
         !isStacyEnabled()
     ) {
-
-        console.log(
-            "🤖 STACY: DISABLED"
-        );
-
         return false;
     }
 
@@ -1343,26 +1252,6 @@ async function handleStacy(
             message,
             chatJid
         );
-
-    console.log(
-        "🧪 STACY ENABLED:",
-        isStacyEnabled()
-    );
-
-    console.log(
-        "🧪 STACY MENTIONED:",
-        mentioned
-    );
-
-    console.log(
-        "🧪 STACY REPLIED TO:",
-        repliedToStacy
-    );
-
-    console.log(
-        "🧪 STACY TEXT:",
-        text
-    );
 
     if (
         !mentioned &&
@@ -1415,16 +1304,7 @@ Respond naturally to the user's reply.`;
         message?.key?.remoteJid ||
         null;
 
-    console.log(
-        "🧠 STACY CURRENT PERSON LID:",
-        personLid
-    );
-
     try {
-
-        console.log(
-            "🤖 STACY: Sending prompt to Groq..."
-        );
 
         const reply =
             await askStacy(
@@ -1438,21 +1318,11 @@ Respond naturally to the user's reply.`;
             !reply ||
             !String(reply).trim()
         ) {
-
-            console.log(
-                "⚠️ STACY: AI returned an empty response."
-            );
-
             return true;
         }
 
         const cleanReply =
             String(reply).trim();
-
-        console.log(
-            "🤖 STACY RESPONSE:",
-            cleanReply
-        );
 
         const sent =
             await sock.sendMessage(
@@ -1472,18 +1342,6 @@ Respond naturally to the user's reply.`;
             chatJid,
             cleanReply
         );
-
-        console.log(
-            "🤖 STACY REPLIED"
-        );
-
-        if (personLid) {
-
-            console.log(
-                "🧠 STACY PERSON MEMORY KEY:",
-                personLid
-            );
-        }
 
         return true;
 
@@ -1549,14 +1407,17 @@ async function startBot() {
     );
 
     /* ============================= */
-    /* PAIRING CODE LOGIC */
+    /* PAIRING CODE LOGIC (UPDATED)  */
     /* ============================= */
 
     if (!sock.authState.creds.registered) {
         const phoneNumber = await question('\nEnter your WhatsApp phone number (with country code, e.g. 234123456789): ');
         const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
 
-        await delay(3000);
+        console.log('⏳ Requesting code...');
+        
+        // Increased delay to 6 seconds to prevent 428 handshake drops
+        await delay(6000);
 
         try {
             const code = await sock.requestPairingCode(cleanPhone);
@@ -1694,13 +1555,6 @@ async function startBot() {
                         WAMessageStubType.REVOKE
                     ) {
 
-                        console.log(
-                            "🗑️ MESSAGE DELETED:",
-                            update
-                                ?.key
-                                ?.id
-                        );
-
                         await handleDeletedMessage(
                             sock,
                             update.key
@@ -1730,16 +1584,6 @@ async function startBot() {
             requestId
         }) => {
 
-            console.log(
-                "📦 UPSERT TYPE:",
-                type,
-                "MESSAGES:",
-                messages.length,
-                "REQUEST ID:",
-                requestId ||
-                "none"
-            );
-
             for (
                 const message of messages
             ) {
@@ -1749,7 +1593,6 @@ async function startBot() {
                     if (
                         !message?.message
                     ) {
-
                         continue;
                     }
 
@@ -1833,10 +1676,6 @@ async function startBot() {
                                 !senderIsAdmin
                             ) {
 
-                                console.log(
-                                    "🚫 LINK DETECTED"
-                                );
-
                                 await sock.sendMessage(
                                     chatJid,
                                     {
@@ -1860,16 +1699,8 @@ async function startBot() {
                                     }
                                 );
 
-                                console.log(
-                                    "✅ Link message deleted."
-                                );
-
                                 continue;
                             }
-
-                            console.log(
-                                "👑 Admin link allowed."
-                            );
 
                         } catch (error) {
 
@@ -1879,48 +1710,6 @@ async function startBot() {
                             );
                         }
                     }
-
-                    /* ========================= */
-                    /* DEBUG */
-                    /* ========================= */
-
-                    console.log(
-                        "\n━━━━━━━━━━━━━━━━━━━━"
-                    );
-
-                    console.log(
-                        "📩 MESSAGE RECEIVED"
-                    );
-
-                    console.log(
-                        "JID:",
-                        chatJid
-                    );
-
-                    console.log(
-                        "FROM:",
-                        message.key.participant ||
-                        message.key.remoteJid
-                    );
-
-                    console.log(
-                        "TEXT:",
-                        text
-                    );
-
-                    console.log(
-                        "FROM ME:",
-                        message.key.fromMe
-                    );
-
-                    console.log(
-                        "UPSERT TYPE:",
-                        type
-                    );
-
-                    console.log(
-                        "━━━━━━━━━━━━━━━━━━━━"
-                    );
 
                     /* ================================================= */
                     /* 💣 BOMB GAME MESSAGE ROUTING                     */
@@ -2029,20 +1818,6 @@ async function startBot() {
                                     sock
                                 );
 
-                            console.log(
-                                "🔎 VV2 STICKER DETECTED"
-                            );
-
-                            console.log(
-                                "👑 VV2 OWNER:",
-                                owner
-                            );
-
-                            console.log(
-                                "🔐 VV2 PAIRED:",
-                                paired
-                            );
-
                             if (
                                 owner ||
                                 paired
@@ -2055,10 +1830,6 @@ async function startBot() {
                                     args: [],
                                     command: "vv2"
                                 });
-
-                                console.log(
-                                    "✅ VV2 STICKER ROUTED"
-                                );
                             }
                         }
 
@@ -2117,16 +1888,6 @@ async function startBot() {
                             command
                         );
 
-                    console.log(
-                        "🔎 COMMAND:",
-                        command
-                    );
-
-                    console.log(
-                        "🔎 HANDLER FOUND:",
-                        !!handler
-                    );
-
                     if (!handler) {
                         continue;
                     }
@@ -2146,16 +1907,6 @@ async function startBot() {
                             message,
                             sock
                         );
-
-                    console.log(
-                        "👑 OWNER:",
-                        owner
-                    );
-
-                    console.log(
-                        "🔐 PAIRED:",
-                        paired
-                    );
 
                     /* ========================= */
                     /* OWNER-ONLY COMMANDS */
@@ -2197,11 +1948,6 @@ async function startBot() {
                         !owner &&
                         !paired
                     ) {
-
-                        console.log(
-                            "🚫 USER NOT PAIRED"
-                        );
-
                         continue;
                     }
 
@@ -2229,11 +1975,6 @@ Contact owner to wake up.`
                         continue;
                     }
 
-                    console.log(
-                        "🚀 RUNNING COMMAND:",
-                        command
-                    );
-
                     /* ========================= */
                     /* COMMAND REACTION */
                     /* ========================= */
@@ -2260,11 +2001,6 @@ Contact owner to wake up.`
                             args,
                             command
                         });
-
-                    console.log(
-                        "📤 COMMAND RESULT:",
-                        result
-                    );
 
                     if (result) {
 
