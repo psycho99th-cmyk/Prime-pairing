@@ -15,7 +15,19 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SESSIONS_DIR = path.join(__dirname, 'sessions');
-const BOT_DIR = path.join(__dirname, 'bot-files');
+const BOT_DIR = __dirname; // bot files live next to server.js
+
+// Left out of the zip: pairing-server files, session data and secrets
+const ZIP_IGNORE = [
+    'server.js',
+    'package.json',
+    'package-lock.json',
+    'node_modules/**',
+    'sessions/**',
+    'auth/**',
+    '.git/**',
+    '.env'
+];
 
 const CODE_WAIT_MS = 5 * 60 * 1000;      // time to enter the code in WhatsApp
 const DOWNLOAD_WAIT_MS = 10 * 60 * 1000; // time to download after linking
@@ -191,14 +203,12 @@ app.get('/api/download/:sessionId', (req, res) => {
     // Your bot reads its login from ./auth
     archive.directory(s.dir, 'auth');
 
-    // Bot files, without secrets or heavy folders
-    if (fs.existsSync(BOT_DIR)) {
-        archive.glob('**/*', {
-            cwd: BOT_DIR,
-            dot: true,
-            ignore: ['node_modules/**', 'auth/**', '.git/**', '.env']
-        });
-    }
+    // All bot files (commands, config, index.js, ...) except the ignored ones
+    archive.glob('**/*', {
+        cwd: BOT_DIR,
+        dot: true,
+        ignore: ZIP_IGNORE
+    });
 
     res.on('finish', () => setTimeout(() => destroySession(id), 5000));
     archive.finalize();
