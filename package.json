@@ -1,0 +1,23 @@
+{
+  "name": "prime-pairing",
+  "version": "1.0.0",
+  "description": "PRIME BOT Web Pairing Server & Deployment Service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "STEEZE",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "archiver": "^7.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fs-extra": "^11.2.0",
+    "pino": "^10.3.1"
+  }
+}
