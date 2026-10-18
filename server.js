@@ -53,7 +53,7 @@ const BOT_PACKAGE = {
 
 const CODE_WAIT_MS = 5 * 60 * 1000;      // time to enter the code in WhatsApp
 const DOWNLOAD_WAIT_MS = 10 * 60 * 1000; // time to download after linking
-const MAX_SESSIONS = 30;                 // protects the free Render instance
+const MAX_SESSIONS = Number(process.env.MAX_SESSIONS) || 15; // people pairing at once (RAM limit)
 
 app.set('trust proxy', 1);
 app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
@@ -67,19 +67,23 @@ const sessions = new Map();
 /* ---------- helpers ---------- */
 
 const hits = new Map();
-function rateLimited(ip) {
+function rateLimited(key, max) {
     const now = Date.now();
-    const list = (hits.get(ip) || []).filter((t) => now - t < 10 * 60 * 1000);
-    const limited = list.length >= 5; // 5 codes per 10 minutes per IP
+    const list = (hits.get(key) || []).filter((t) => now - t < 10 * 60 * 1000);
+    const limited = list.length >= max; // max requests per 10 minutes per key
     if (!limited) list.push(now);
-    hits.set(ip, list);
+    hits.set(key, list);
     return limited;
 }
+
+// One pending session per phone number, so a re-request replaces the old one
+const byPhone = new Map();
 
 function destroySession(id) {
     const s = sessions.get(id);
     if (!s) return;
     s.closed = true;
+    if (byPhone.get(s.phone) === id) byPhone.delete(s.phone);
     try { s.socket?.end(); } catch {}
     fs.remove(s.dir).catch(() => {});
     sessions.delete(id);
@@ -136,6 +140,9 @@ setInterval(() => {
     for (const [id, s] of sessions) {
         if (now > s.expiresAt) destroySession(id);
     }
+    for (const [key, list] of hits) {
+        if (!list.some((t) => now - t < 10 * 60 * 1000)) hits.delete(key);
+    }
 }, 60 * 1000);
 
 /* ---------- routes ---------- */
@@ -152,12 +159,19 @@ app.post('/api/request-code', async (req, res) => {
             message: 'Enter a valid number with country code, e.g. 234123456789.'
         });
     }
-    if (rateLimited(req.ip)) {
+    if (rateLimited(`ip:${req.ip}`, 20) || rateLimited(`phone:${phone}`, 6)) {
         return res.status(429).json({
             success: false,
             message: 'Too many attempts. Wait a few minutes and try again.'
         });
     }
+
+    // Same number asking again (e.g. after a refresh): drop its unfinished session
+    const oldId = byPhone.get(phone);
+    if (oldId && sessions.get(oldId)?.status === 'pending') {
+        destroySession(oldId);
+    }
+
     if (sessions.size >= MAX_SESSIONS) {
         return res.status(503).json({
             success: false,
@@ -172,8 +186,10 @@ app.post('/api/request-code', async (req, res) => {
         socket: null,
         closed: false,
         retries: 0,
-        expiresAt: Date.now() + CODE_WAIT_MS
+        expiresAt: Date.now() + CODE_WAIT_MS,
+        phone
     });
+    byPhone.set(phone, id);
 
     try {
         const { socket, state } = await connect(id);
