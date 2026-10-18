@@ -1414,7 +1414,7 @@ async function startBot() {
         const phoneNumber = await question('\nEnter your WhatsApp phone number (with country code, e.g. 234123456789): ');
         const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
 
-        console.log('⏳ Requesting code...');
+        console.log('⏳ Connecting to WhatsApp servers...');
         
         // Increased delay to 6 seconds to prevent 428 handshake drops
         await delay(6000);
@@ -1737,6 +1737,23 @@ async function startBot() {
                         }
                     }
 
+/* 🔤 WRG GAME MESSAGE ROUTING */
+
+const wrgCommand = commands.get("wrg");
+
+if (wrgCommand && typeof wrgCommand.handleText === "function") {
+
+    const wrgHandled = await wrgCommand.handleText({
+        sock,
+        jid: chatJid,
+        message,
+        text
+    });
+
+    if (wrgHandled) {
+        continue;
+    }
+}
                     /* ================================================= */
                     /* 🎯 GUESS GAME MESSAGE ROUTING                    */
                     /* ================================================= */
