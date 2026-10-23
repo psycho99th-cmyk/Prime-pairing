@@ -1,0 +1,66 @@
+{
+  "users": {
+    "380912619304": {
+      "id": "380912619304",
+      "name": "prime",
+      "registeredAt": 1792743379732,
+      "wallet": 91900,
+      "bank": 10000,
+      "inventory": {},
+      "cooldowns": {
+        "daily": 1792835153021
+      },
+      "streak": 0,
+      "jid": "380912619304@s.whatsapp.net",
+      "history": [
+        {
+          "type": "earn",
+          "description": "Admin Added Coins",
+          "amount": 100000,
+          "timestamp": 1792750641486
+        },
+        {
+          "type": "spend",
+          "description": "Bank Deposit",
+          "amount": 10000,
+          "timestamp": 1792750652377
+        }
+      ]
+    },
+    "2349158667929": {
+      "id": "2349158667929",
+      "name": "STƎEZE",
+      "registeredAt": 1792743404423,
+      "wallet": 201000,
+      "bank": 0,
+      "inventory": {},
+      "cooldowns": {
+        "daily": 1792831179645
+      },
+      "streak": 0,
+      "jid": "2349158667929@s.whatsapp.net",
+      "history": [
+        {
+          "type": "earn",
+          "description": "Admin Added Coins",
+          "amount": 200000,
+          "timestamp": 1792750038586
+        },
+        {
+          "type": "spend",
+          "description": "CV Purchase",
+          "amount": 5000,
+          "timestamp": 1792750099789
+        }
+      ],
+      "cv": {
+        "createdAt": 1792750099788,
+        "expiresAt": 1793959699788
+      }
+    }
+  },
+  "lids": {
+    "237971974430778@lid": "380912619304",
+    "107894276112526@lid": "2349158667929"
+  }
+}
