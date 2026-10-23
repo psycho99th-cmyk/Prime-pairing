@@ -10,9 +10,10 @@ const MIN_LENGTH = 4;
 const MAX_LENGTH = 11;
 const TOTAL_ROUNDS = MAX_LENGTH - MIN_LENGTH + 1;
 
-// true  = a wrong word knocks the player out
-// false = a wrong word only gives a warning (a timeout still knocks them out)
-const ELIMINATE_ON_WRONG = true;
+// true  = a wrong word knocks the player out straight away
+// false = a wrong word only gives a warning, the player can retry until the
+//         30 second timer runs out (only the timeout knocks them out)
+const ELIMINATE_ON_WRONG = false;
 
 /* ============================= */
 /* WORD CHECKING */
@@ -307,7 +308,8 @@ A new word game has been created!
 
 📝 *HOW TO PLAY*
 Every round has a word length, and *everyone* takes a turn spelling a word of that length.
-Round 1 is *${MIN_LENGTH} letters*, then it grows by 1 each round, up to *${MAX_LENGTH} letters*.
+Round 1 needs at least *${MIN_LENGTH} letters*, then it grows by 1 each round, up to *${MAX_LENGTH} letters*.
+Longer words are accepted and score more!
 No answer in time${ELIMINATE_ON_WRONG ? " or a wrong word" : ""} = you're out!
 
 ⏳ *JOINING TIME: 1 MINUTE*
@@ -367,7 +369,8 @@ async function startDirectGame(sock, jid, game, message) {
 
 📝 *HOW TO PLAY*
 Every round has a word length, and each player spells a word of that length.
-Round 1 is *${MIN_LENGTH} letters*, then it grows by 1 each round, up to *${MAX_LENGTH} letters*.
+Round 1 needs at least *${MIN_LENGTH} letters*, then it grows by 1 each round, up to *${MAX_LENGTH} letters*.
+Longer words are accepted and score more!
 No answer in time${ELIMINATE_ON_WRONG ? " or a wrong word" : ""} = you're out!
 
 👥 *PLAYERS*
@@ -532,25 +535,9 @@ async function startRound(sock, jid, game, alive, nextLength) {
     game.round++;
     game.length = nextLength;
     game.order = shuffle(alive);
-    game.step++;
 
-    const orderText =
-        game.players.length > 1
-            ? `\n\n📋 *TURN ORDER*\n\n${formatPlayers(game, game.order)}`
-            : "";
-
-    await send(
-        sock,
-        jid,
-`🔤 *WRG GAME*
-
-🔄 *ROUND ${game.round}/${TOTAL_ROUNDS}*
-
-✍️ ${game.players.length > 1 ? "Everyone spells" : "Spell"} a word with exactly *${game.length} letters*.${orderText}`,
-        game
-    );
-
-    scheduleNext(sock, jid, game);
+    // No round announcement: the first turn of the round starts straight away
+    await startTurn(sock, jid, game);
 }
 
 async function startTurn(sock, jid, game) {
@@ -570,7 +557,7 @@ async function startTurn(sock, jid, game) {
 
 👉 ${label(game, player)}, it's your turn!
 
-✍️ Type a word with exactly *${game.length} letters*.
+✍️ Type a word with at least *${game.length} letters*.
 
 ⏱️ You have *30 seconds*.`,
         game
@@ -686,10 +673,10 @@ async function handleAnswer(sock, jid, game, word, message) {
 
     try {
 
-        if (word.length !== game.length) {
+        if (word.length < game.length) {
 
             problem =
-                `must have exactly ${game.length} letters (yours has ${word.length})`;
+                `needs at least ${game.length} letters (yours has ${word.length})`;
 
         } else if (game.used.has(word)) {
 
@@ -731,7 +718,7 @@ async function handleAnswer(sock, jid, game, word, message) {
             await reply(
                 sock,
                 jid,
-                `⚠️ *${word.toUpperCase()}* — ${problem}. Try again!`,
+                `⚠️ *${word.toUpperCase()}* — ${problem}. Try again before your time is up!`,
                 message,
                 game
             );
@@ -830,7 +817,7 @@ ${label(game, game.players[0])} — ${game.players[0].score} points`;
 
     } else if (highestScore === 0) {
 
-        winnerText = "😅 *NOBODY SCORED*\n\nBetter luck next time!";
+        winnerText = " *NOBODY SCORED*\n\nBetter luck next time!";
 
     } else {
 
